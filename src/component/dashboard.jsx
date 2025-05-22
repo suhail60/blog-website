@@ -13,10 +13,9 @@ const Dashboard = () => {
   const [editingBlogId, setEditingBlogId] = useState(null);
 
   const API_BASE_URL =
-  import.meta.env.MODE === "development"
-    ? import.meta.env.VITE_APP_DEV_API
-    : import.meta.env.VITE_APP_PROD_API;
-
+    import.meta.env.MODE === "development"
+      ? import.meta.env.VITE_APP_DEV_API
+      : import.meta.env.VITE_APP_PROD_API;
 
   const initialBlogState = {
     title: '',
@@ -29,7 +28,7 @@ const Dashboard = () => {
     hashtag: []
   };
 
-  const [newBlog, setNewBlog] = useState(initialBlogState);
+  const [blogData, setBlogData] = useState(initialBlogState);
 
   useEffect(() => {
     const fetchMyBlogs = async () => {
@@ -73,25 +72,25 @@ const Dashboard = () => {
     fetchMyBlogs();
   }, []);
 
-  const handleInputChange = (e) => {
+  const onInputChange = (e) => {
     const { name, value } = e.target;
-    setNewBlog(prev => ({ ...prev, [name]: value }));
+    setBlogData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleHashtagChange = (e) => {
+  const onHashtagChange = (e) => {
     const hashtags = e.target.value.split(',').map(tag => tag.trim());
-    setNewBlog(prev => ({ ...prev, hashtag: hashtags }));
+    setBlogData(prev => ({ ...prev, hashtag: hashtags }));
   };
 
-  const handleImageChange = (e) => {
+  const onImageChange = (e) => {
     const file = e.target.files[0];
-    setNewBlog(prev => ({ ...prev, pic: file }));
+    setBlogData(prev => ({ ...prev, pic: file }));
   };
 
   const handleEditClick = (blog) => {
     setIsEditMode(true);
     setEditingBlogId(blog._id);
-    setNewBlog({
+    setBlogData({
       title: blog.title,
       topic: blog.topic,
       category: blog.category,
@@ -116,24 +115,23 @@ const Dashboard = () => {
     }
 
     try {
-      const url = `${API_BASE_URL}api/blog/create`;
       const formData = new FormData();
-      formData.append('title', newBlog.title);
-      formData.append('topic', newBlog.topic);
-      formData.append('category', newBlog.category);
-      formData.append('description', newBlog.description);
-      formData.append('content', newBlog.content);
+      formData.append('title', blogData.title);
+      formData.append('topic', blogData.topic);
+      formData.append('category', blogData.category);
+      formData.append('description', blogData.description);
+      formData.append('content', blogData.content);
       formData.append('publishDate', new Date().toISOString());
 
-      if (newBlog.pic) {
-        formData.append('pic', newBlog.pic);
+      if (blogData.pic) {
+        formData.append('pic', blogData.pic);
       }
 
-      if (newBlog.hashtag && newBlog.hashtag.length > 0) {
-        formData.append('hashtag', JSON.stringify(newBlog.hashtag));
+      if (blogData.hashtag && blogData.hashtag.length > 0) {
+        formData.append('hashtag', JSON.stringify(blogData.hashtag));
       }
 
-      const res = await fetch(url, {
+      const res = await fetch(`${API_BASE_URL}api/blog/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -146,14 +144,13 @@ const Dashboard = () => {
         throw new Error(errorData.message || `Error: ${res.status}`);
       }
 
-      const blogData = await res.json();
-      setBlogs(prev => [...prev, blogData]);
-
-      setNewBlog(initialBlogState);
+      const createdBlog = await res.json();
+      setBlogs(prev => [...prev, createdBlog]);
+      setBlogData(initialBlogState);
       setActiveTab('myBlogs');
       setError(null);
     } catch (err) {
-      console.error("Blog error:", err.message);
+      console.error("Create error:", err.message);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -172,26 +169,25 @@ const Dashboard = () => {
     }
 
     try {
-      const url = `${API_BASE_URL}api/blog/update/${editingBlogId}`;
       const formData = new FormData();
-      formData.append('title', newBlog.title);
-      formData.append('topic', newBlog.topic);
-      formData.append('category', newBlog.category);
-      formData.append('description', newBlog.description);
-      formData.append('content', newBlog.content);
+      formData.append('title', blogData.title);
+      formData.append('topic', blogData.topic);
+      formData.append('category', blogData.category);
+      formData.append('description', blogData.description);
+      formData.append('content', blogData.content);
       formData.append('publishDate', new Date().toISOString());
 
-      if (newBlog.pic) {
-        formData.append('pic', newBlog.pic);
-      } else if (newBlog.existingPic) {
-        formData.append('existingPic', newBlog.existingPic);
+      if (blogData.pic) {
+        formData.append('pic', blogData.pic);
+      } else if (blogData.existingPic) {
+        formData.append('existingPic', blogData.existingPic);
       }
 
-      if (newBlog.hashtag && newBlog.hashtag.length > 0) {
-        formData.append('hashtag', JSON.stringify(newBlog.hashtag));
+      if (blogData.hashtag && blogData.hashtag.length > 0) {
+        formData.append('hashtag', JSON.stringify(blogData.hashtag));
       }
 
-      const res = await fetch(url, {
+      const res = await fetch(`${API_BASE_URL}api/blog/update/${editingBlogId}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -204,10 +200,10 @@ const Dashboard = () => {
         throw new Error(errorData.message || `Error: ${res.status}`);
       }
 
-      const blogData = await res.json();
-      setBlogs(prev => prev.map(blog => (blog._id === editingBlogId ? blogData : blog)));
-
-      setNewBlog(initialBlogState);
+      const updatedBlog = await res.json();
+      setBlogs(prev => prev.map(blog => (blog._id === editingBlogId ? updatedBlog : blog)));
+      
+      setBlogData(initialBlogState);
       setIsEditMode(false);
       setEditingBlogId(null);
       setActiveTab('myBlogs');
@@ -249,7 +245,7 @@ const Dashboard = () => {
     setActiveTab('myBlogs');
     setIsEditMode(false);
     setEditingBlogId(null);
-    setNewBlog(initialBlogState);
+    setBlogData(initialBlogState);
   };
 
   return (
@@ -276,7 +272,7 @@ const Dashboard = () => {
                 setActiveTab('create');
                 setIsEditMode(false);
                 setEditingBlogId(null);
-                setNewBlog(initialBlogState);
+                setBlogData(initialBlogState);
               }}
             >
               Create New Blog
@@ -319,8 +315,9 @@ const Dashboard = () => {
               <div className="empty-state">You haven't created any blogs yet.</div>
             ) : (
               <div className="blog-grid">
-                {blogs.map((blog, idx) => (
-                  <div key={idx} className="blog-card">
+                {blogs.map((blog) => (
+                  <div key={blog._id} className="blog-card">
+                   
                     {blog.pic && (
                       <img 
                         src={`${API_BASE_URL}${blog.pic}`} 
@@ -333,10 +330,6 @@ const Dashboard = () => {
                       <p className="blog-topic">{blog.topic}</p>
                       <p className="blog-category">{blog.category}</p>
                       <p className="blog-description">{blog.description}</p>
-                      <p className="blog-description">
-                        {blog.content?.split(" ").slice(0, 30).join(" ")}
-                        {blog.content?.split(" ").length > 30 && '...'}
-                      </p>
                       <p className="blog-date">
                         {new Date(blog.publishDate).toLocaleDateString()}
                       </p>
@@ -379,20 +372,118 @@ const Dashboard = () => {
             </div>
 
             <form onSubmit={handleCreateBlog} className="blog-form">
-              {/* ... (keep the create form fields same as before) ... */}
+              <div className="form-group">
+                <label htmlFor="title">Title*</label>
+                <input 
+                  type="text" 
+                  id="title" 
+                  name="title" 
+                  value={blogData.title} 
+                  onChange={onInputChange} 
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="topic">Topic*</label>
+                <input 
+                  type="text" 
+                  id="topic" 
+                  name="topic" 
+                  value={blogData.topic} 
+                  onChange={onInputChange} 
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="category">Category*</label>
+                <select 
+                  id="category" 
+                  name="category" 
+                  value={blogData.category} 
+                  onChange={onInputChange} 
+                  required
+                >
+                  <option value="">Select a category</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Science">Science</option>
+                  <option value="Business">Business</option>
+                  <option value="Health">Health</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Description*</label>
+                <textarea 
+                  id="description" 
+                  name="description" 
+                  value={blogData.description} 
+                  onChange={onInputChange} 
+                  required 
+                  rows="3" 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="content">Content*</label>
+                <textarea 
+                  id="content" 
+                  name="content" 
+                  value={blogData.content} 
+                  onChange={onInputChange} 
+                  required 
+                  rows="10" 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="pic">Cover Image</label>
+                <input
+                  type="file"
+                  id="pic"
+                  name="pic"
+                  accept="image/*"
+                  onChange={onImageChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="hashtag">Hashtags (comma separated)</label>
+                <input
+                  type="text"
+                  id="hashtag"
+                  name="hashtag"
+                  value={blogData.hashtag.join(', ')}
+                  onChange={onHashtagChange}
+                  placeholder="tech, ai, future"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button 
+                  type="submit" 
+                  className="submit-button" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Creating...' : 'Create Blog'}
+                </button>
+              </div>
             </form>
           </div>
         )}
 
         {activeTab === 'create' && isEditMode && (
           <BlogUpdate
-            blogData={newBlog}
+            blogData={blogData}
             onSubmit={handleUpdateBlog}
             onCancel={handleCancelEdit}
             isLoading={isLoading}
-            onInputChange={handleInputChange}
-            onHashtagChange={handleHashtagChange}
-            onImageChange={handleImageChange}
+            onInputChange={onInputChange}
+            onHashtagChange={onHashtagChange}
+            onImageChange={onImageChange}
           />
         )}
       </div>

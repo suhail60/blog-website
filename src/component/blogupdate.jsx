@@ -25,7 +25,7 @@ const BlogUpdate = ({
         </button>
       </div>
 
-      <form onSubmit={onSubmit} className="blog-form">
+      <form onSubmit={onSubmit} className="blog-form" htmlFor="form">
         <div className="form-group">
           <label htmlFor="title">Title*</label>
           <input 

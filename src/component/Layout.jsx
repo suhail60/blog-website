@@ -14,7 +14,11 @@ function Layout() {
   
        if (loading) return <p>Loading blogs...</p>;
   if (error) return <p>{error}</p>;
-  console.log(filteredData)
+  console.log()
+
+  useEffect(()=>{
+    
+  },[filteredData])
   return (
   
 

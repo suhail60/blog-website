@@ -43,6 +43,7 @@ const isLoggedIn = () => {
         const res = await fetch(`${API_BASE_URL}api/blog/read`);
         const blogs = await res.json();
         setData(blogs);
+        // console.log(blogs)
         setError(null);
       } catch (err) {
         setError("Failed to load blogs");
@@ -64,12 +65,14 @@ const filteredData = data.filter((blog) => {
 });
 
 
+
+
   // Calculate paginated data
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
+// console.log(currentItems)
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
