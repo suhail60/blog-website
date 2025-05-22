@@ -7,7 +7,7 @@ function SingleBlogPage() {
   const [blog, setBlog] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/blog/read/${id}`)
+    fetch(`https://blog-website-backend-ea82.onrender.com/api/blog/read/${id}`)
       .then((res) => res.json())
       .then((data) => setBlog(data))
       .catch((err) => console.error('Error:', err));

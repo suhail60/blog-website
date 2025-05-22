@@ -32,7 +32,7 @@ const Dashboard = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
 
-        const res = await fetch("http://localhost:5000/api/blog/myBlogs", {
+        const res = await fetch("https://blog-website-backend-ea82.onrender.com/api/blog/myBlogs", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

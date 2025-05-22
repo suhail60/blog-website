@@ -36,7 +36,7 @@ const isLoggedIn = () => {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/blog/read");
+        const res = await fetch("https://blog-website-backend-ea82.onrender.com/api/blog/");
         const blogs = await res.json();
         setData(blogs);
         setError(null);
