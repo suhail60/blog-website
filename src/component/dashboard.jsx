@@ -12,6 +12,12 @@ const Dashboard = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBlogId, setEditingBlogId] = useState(null);
 
+  const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
+
+
   const initialBlogState = {
     title: '',
     topic: '',
@@ -32,7 +38,7 @@ const Dashboard = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
 
-        const res = await fetch("https://blog-website-backend-ea82.onrender.com/api/blog/myBlogs", {
+        const res = await fetch(`${API_BASE_URL}api/blog/myBlogs`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -110,7 +116,7 @@ const Dashboard = () => {
     }
 
     try {
-      const url = "http://localhost:5000/api/blog/create";
+      const url = `${API_BASE_URL}api/blog/create`;
       const formData = new FormData();
       formData.append('title', newBlog.title);
       formData.append('topic', newBlog.topic);
@@ -166,7 +172,7 @@ const Dashboard = () => {
     }
 
     try {
-      const url = `http://localhost:5000/api/blog/update/${editingBlogId}`;
+      const url = `${API_BASE_URL}api/blog/update/${editingBlogId}`;
       const formData = new FormData();
       formData.append('title', newBlog.title);
       formData.append('topic', newBlog.topic);
@@ -220,7 +226,7 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/blog/delete/${blogId}`, {
+      const res = await fetch(`${API_BASE_URL}api/blog/delete/${blogId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -317,7 +323,7 @@ const Dashboard = () => {
                   <div key={idx} className="blog-card">
                     {blog.pic && (
                       <img 
-                        src={`http://localhost:5000${blog.pic}`} 
+                        src={`${API_BASE_URL}${blog.pic}`} 
                         alt={blog.title} 
                         className="blog-cover" 
                       />

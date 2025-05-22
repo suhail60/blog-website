@@ -7,6 +7,10 @@ import Pagination from './Pagination';
 
 function Layout() {
   const { filteredData, loading, error,  } = useContext(BlogContext);
+  const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
   
        if (loading) return <p>Loading blogs...</p>;
   if (error) return <p>{error}</p>;
@@ -23,7 +27,7 @@ function Layout() {
         filteredData.map((item) => (
           <Link to={`/blog/${item._id}`} key={item._id}  className="blog-card " style={{textDecoration:"none"}}>
             <div className="card-image">
-              <img src={item.pic?.startsWith('http') ? item.pic : `https://blog-website-backend-ea82.onrender.com/${item.pic}`} alt={item.title} />
+              <img src={item.pic?.startsWith('http') ? item.pic : `${API_BASE_URL}${item.pic}`} alt={item.title} />
             </div>
             <div className="card-content">
               <span className="category">{item.category}</span>
@@ -31,7 +35,7 @@ function Layout() {
               <p className="excerpt">  {item.content.split(" ").slice(0, 30).join(" ")}{item.content.split(" ").length > 30 && '...'}</p>
               <div className="meta">
                 <div className="author">
-                  <img src={item.pic?.startsWith('http') ? item.pic : `https://blog-website-backend-ea82.onrender.com/${item.pic}`} alt={item.author} />
+                  <img src={item.pic?.startsWith('http') ? item.pic : `${API_BASE_URL}/${item.pic}`} alt={item.author} />
                   <span>{item.author}</span>
                 </div>
                 <span>{item.publishDate}</span>

@@ -8,6 +8,11 @@ function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showCPassword, setShowCPassword] = useState(false);
 
+  const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -43,7 +48,7 @@ function SignUp() {
     }
 
     try {
-      const res = await fetch("https://blog-website-backend-ea82.onrender.com/api/auth/signup", {
+      const res = await fetch(`${API_BASE_URL}api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

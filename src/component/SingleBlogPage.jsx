@@ -5,9 +5,13 @@ import { useEffect, useState } from 'react';
 function SingleBlogPage() {
       const { id } = useParams();
   const [blog, setBlog] = useState(null);
+  const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
 
   useEffect(() => {
-    fetch(`https://blog-website-backend-ea82.onrender.com/api/blog/read/${id}`)
+    fetch(`${API_BASE_URL}api/blog/read/${id}`)
       .then((res) => res.json())
       .then((data) => setBlog(data))
       .catch((err) => console.error('Error:', err));

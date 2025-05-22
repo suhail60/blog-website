@@ -9,6 +9,10 @@ const BlogUpdate = ({
   onHashtagChange,
   onImageChange
 }) => {
+  const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
   return (
     <div className="create-blog">
       <div className="blog-list-header">
@@ -90,7 +94,7 @@ const BlogUpdate = ({
             <div className="current-image">
               <p>Current Image:</p>
               <img 
-                src={`http://localhost:5000${blogData.existingPic}`} 
+                src={`${API_BASE_URL}${blogData.existingPic}`} 
                 alt="Current cover" 
                 style={{ maxWidth: '200px', marginTop: '10px' }}
               />

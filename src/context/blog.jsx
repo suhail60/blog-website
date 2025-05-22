@@ -1,8 +1,12 @@
 import React, { createContext, useState, useEffect } from "react";
-
 export const BlogContext = createContext();
 
 export const BlogProvider = ({ children }) => {
+const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
+
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +40,7 @@ const isLoggedIn = () => {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
-        const res = await fetch("https://blog-website-backend-ea82.onrender.com/api/blog/read");
+        const res = await fetch(`${API_BASE_URL}api/blog/read`);
         const blogs = await res.json();
         setData(blogs);
         setError(null);

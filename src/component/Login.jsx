@@ -9,6 +9,10 @@ function Login() {
   const [password, setPassword] = useState('');
   const [errMsg, setErrMsg] = useState('');
     const { isAuthenticated ,setAuthenticated } = useContext(BlogContext);
+    const API_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_APP_DEV_API
+    : import.meta.env.VITE_APP_PROD_API;
   
   // useEffect(() => {
   //   if (isAuthenticated) {
@@ -21,7 +25,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await fetch('https://blog-website-backend-ea82.onrender.com/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
