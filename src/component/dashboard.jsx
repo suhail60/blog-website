@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { jwtDecode } from "jwt-decode";
 import { Link } from 'react-router-dom';
 import BlogUpdate from '../component/blogupdate';
 import "./dashboard.css";
@@ -48,19 +47,20 @@ const Dashboard = () => {
         if (!res.ok) throw new Error(`Error: ${res.status}`);
 
         const data = await res.json();
-        const decoded = jwtDecode(token);
-        const loggedUserId = decoded.userId || decoded.id || decoded._id;
+        console.log(data.blogs)
+        // const decoded = jwtDecode(token);
+        // const loggedUserId = decoded.userId || decoded.id || decoded._id;
 
-        const userBlogs = Array.isArray(data)
-          ? data.filter(blog => {
-              const createdBy = blog.createdBy;
-              return typeof createdBy === "object"
-                ? createdBy._id === loggedUserId
-                : createdBy === loggedUserId;
-            })
-          : [];
+        // const userBlogs = Array.isArray(data)
+        //   ? data.filter(blog => {
+        //       const createdBy = blog.createdBy;
+        //       return typeof createdBy === "object"
+        //         ? createdBy._id === loggedUserId
+        //         : createdBy === loggedUserId;
+        //     })
+        //   : [];
 
-        setBlogs(userBlogs);
+        setBlogs(data.blogs);
       } catch (err) {
         console.error("Fetch error:", err.message);
         setError(err.message);

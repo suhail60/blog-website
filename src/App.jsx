@@ -5,7 +5,7 @@ import Login from './component/Login';
 import Navbar from './component/Navbar';
 import SingleBlogPage from './component/SingleBlogPage';
 import SignUp from './component/SignUp';
-import Dashboard from './component/Dashboard';
+import Dashboard from './component/dashboard.jsx';
 import Profile from './component/Profile';
 // import PrivateRoute from './component/auth/PrivateRoute';
 

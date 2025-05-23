@@ -54,6 +54,8 @@ const isLoggedIn = () => {
 
     fetchBlogs();
   }, []);
+
+  
 const filteredData = data.filter((blog) => {
   let term = searchTerm.toLowerCase();
   return (

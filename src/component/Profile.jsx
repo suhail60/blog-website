@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
-import './Profile.css'; // We'll create this CSS file
+
 
 const Profile = () => {
   const [user, setUser] = useState({
