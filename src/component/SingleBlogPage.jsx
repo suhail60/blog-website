@@ -32,7 +32,7 @@ function SingleBlogPage() {
             <h1 className="blog-title">{blog.title}</h1>
             <div className="blog-meta">
                 <div className="blog-author">
-                    <img  src={blog.pic?.startsWith('http') ? blog.pic : `http://localhost:5000${blog.pic}`} alt="Sarah Johnson"/>
+                    <img  src={blog.pic?.startsWith('http') ? blog.pic : `${API_BASE_URL}${blog.pic}`} alt="Sarah Johnson"/>
                     <span>{blog.author}</span>
                 </div>
                 <div className="blog-date">
@@ -43,7 +43,7 @@ function SingleBlogPage() {
         </div>
 
         <div className="featured-image">
-        <img   src={blog.pic?.startsWith('http') ? blog.pic : `http://localhost:5000${blog.pic}`}alt="" />
+        <img   src={blog.pic?.startsWith('http') ? blog.pic : `${API_BASE_URL}${blog.pic}`}alt="" />
         </div>
 
         <div className="blog-content">

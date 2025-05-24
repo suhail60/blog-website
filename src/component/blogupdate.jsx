@@ -80,17 +80,8 @@ const BlogUpdate = ({
             rows="3" 
           />
         </div>
-
-        <div className="form-group">
-          <label htmlFor="pic">Cover Image</label>
-          <input
-            type="file"
-            id="pic"
-            name="pic"
-            accept="image/*"
-            onChange={onImageChange}
-          />
-          {!blogData.pic && blogData.existingPic && (
+        
+        {!blogData.pic && blogData.existingPic && (
             <div className="current-image">
               <p>Current Image:</p>
               <img 
@@ -101,6 +92,17 @@ const BlogUpdate = ({
               <p className="image-note">Leave blank to keep current image</p>
             </div>
           )}
+
+        <div className="form-group">
+          <label htmlFor="pic">Cover Image</label>
+          <input
+            type="file"
+            id="pic"
+            name="image"
+            accept="image/*"
+            onChange={onImageChange}
+          />
+          
         </div>
 
         <div className="form-group">

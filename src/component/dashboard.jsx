@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import BlogUpdate from '../component/blogupdate';
+
 import "./dashboard.css";
 
 const Dashboard = () => {
@@ -10,6 +11,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBlogId, setEditingBlogId] = useState(null);
+ 
 
   const API_BASE_URL =
     import.meta.env.MODE === "development"
@@ -48,17 +50,6 @@ const Dashboard = () => {
 
         const data = await res.json();
         console.log(data.blogs)
-        // const decoded = jwtDecode(token);
-        // const loggedUserId = decoded.userId || decoded.id || decoded._id;
-
-        // const userBlogs = Array.isArray(data)
-        //   ? data.filter(blog => {
-        //       const createdBy = blog.createdBy;
-        //       return typeof createdBy === "object"
-        //         ? createdBy._id === loggedUserId
-        //         : createdBy === loggedUserId;
-        //     })
-        //   : [];
 
         setBlogs(data.blogs);
       } catch (err) {
@@ -70,7 +61,7 @@ const Dashboard = () => {
     };
 
     fetchMyBlogs();
-  }, []);
+  }, [activeTab]);
 
   const onInputChange = (e) => {
     const { name, value } = e.target;
@@ -84,6 +75,7 @@ const Dashboard = () => {
 
   const onImageChange = (e) => {
     const file = e.target.files[0];
+    console.log(file)
     setBlogData(prev => ({ ...prev, pic: file }));
   };
 
@@ -143,9 +135,36 @@ const Dashboard = () => {
         const errorData = await res.json();
         throw new Error(errorData.message || `Error: ${res.status}`);
       }
+      
+    // Instead of using the response directly, refetch the full list
+    const refreshRes = await fetch(`${API_BASE_URL}api/blog/myBlogs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!refreshRes.ok) throw new Error(`Refresh error: ${refreshRes.status}`);
+
+    const refreshedData = await refreshRes.json();
+    setBlogs(refreshedData.blogs);
 
       const createdBlog = await res.json();
-      setBlogs(prev => [...prev, createdBlog]);
+      const normalizedBlog = {
+        ...createdBlog,
+        publishDate: createdBlog.publishDate || new Date().toISOString(),
+        pic: createdBlog.pic || '',
+        topic: createdBlog.topic || '',
+        category: createdBlog.category || '',
+        description: createdBlog.description || '',
+        content: createdBlog.content || '',
+        hashtag: createdBlog.hashtag || [],
+        // Add more defaults if necessary
+      };
+
+      setBlogs(prev => [...prev, normalizedBlog]);
+
       setBlogData(initialBlogState);
       setActiveTab('myBlogs');
       setError(null);
@@ -157,65 +176,230 @@ const Dashboard = () => {
     }
   };
 
-  const handleUpdateBlog = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  // const handleUpdateBlog = async (e) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("No token found");
-      setIsLoading(false);
-      return;
-    }
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     setError("No token found");
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    try {
-      const formData = new FormData();
-      formData.append('title', blogData.title);
-      formData.append('topic', blogData.topic);
-      formData.append('category', blogData.category);
-      formData.append('description', blogData.description);
-      formData.append('content', blogData.content);
-      formData.append('publishDate', new Date().toISOString());
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append('title', blogData.title);
+  //     formData.append('topic', blogData.topic);
+  //     formData.append('category', blogData.category);
+  //     formData.append('description', blogData.description);
+  //     formData.append('content', blogData.content);
+  //     formData.append('publishDate', new Date().toISOString());
 
-      if (blogData.pic) {
-        formData.append('pic', blogData.pic);
-      } else if (blogData.existingPic) {
-        formData.append('existingPic', blogData.existingPic);
-      }
+  //     if (blogData.pic) {
+  //       formData.append('pic', blogData.pic);
+  //     } else if (blogData.existingPic) {
+  //       formData.append('existingPic', blogData.existingPic);
+  //     }
 
-      if (blogData.hashtag && blogData.hashtag.length > 0) {
-        formData.append('hashtag', JSON.stringify(blogData.hashtag));
-      }
+  //     if (blogData.hashtag && blogData.hashtag.length > 0) {
+  //       formData.append('hashtag', JSON.stringify(blogData.hashtag));
+  //     }
 
-      const res = await fetch(`${API_BASE_URL}api/blog/update/${editingBlogId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+  //     const res = await fetch(`${API_BASE_URL}api/blog/update/${editingBlogId}`, {
+  //       method: "PUT",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: formData,
+  //     });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || `Error: ${res.status}`);
-      }
+  //     if (!res.ok) {
+  //       const errorData = await res.json();
+  //       throw new Error(errorData.message || `Error: ${res.status}`);
+  //     }
 
-      const updatedBlog = await res.json();
-      setBlogs(prev => prev.map(blog => (blog._id === editingBlogId ? updatedBlog : blog)));
+  //     const updatedBlog = await res.json();
+  //     setBlogs(prev => prev.map(blog => (blog._id === editingBlogId ? updatedBlog : blog)));
+       
+  //     setBlogData(initialBlogState);
+  //     setIsEditMode(false);
+  //     setEditingBlogId(null);
+   
+  //     setActiveTab('myBlogs');
+  //     setError(null);
+  //   } catch (err) {
+  //     console.error("Update error:", err.message);
+  //     setError(err.message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+//   const handleUpdateBlog = async (e) => {
+//   e.preventDefault();
+//   setIsLoading(true);
+//   setError(null);
+
+//   const token = localStorage.getItem("token");
+//   if (!token) {
+//     setError("No token found");
+//     setIsLoading(false);
+//     return;
+//   }
+
+//   try {
+//     // Validate image before upload
+  
+//     const formData = new FormData();
+//     formData.append('title', blogData.title);
+//     formData.append('topic', blogData.topic);
+//     formData.append('category', blogData.category);
+//     formData.append('description', blogData.description);
+//     formData.append('content', blogData.content);
+
+//       if (blogData.pic) {
+//       if (blogData.pic.size > 5 * 1024 * 1024) {
+//         throw new Error("Image must be smaller than 5MB");
+//       }
+//       if (!blogData.pic.type.startsWith("image/")) {
+//         throw new Error("Only image files are allowed");
+//       }
+//     }
+
+//     if (blogData.pic) formData.append('image', blogData.pic);
+//     // if (blogData.existingPic) formData.append('existingPic', blogData.existingPic);
+//     if (blogData.hashtag?.length) formData.append('hashtag', JSON.stringify(blogData.hashtag));
+
+//     const res = await fetch(`${API_BASE_URL}api/blog/update/${editingBlogId}`, {
+    
+//       method: "PUT",
+//       headers: { Authorization: `Bearer ${token}` },
+//       body: formData,
       
-      setBlogData(initialBlogState);
-      setIsEditMode(false);
-      setEditingBlogId(null);
-      setActiveTab('myBlogs');
-      setError(null);
-    } catch (err) {
-      console.error("Update error:", err.message);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+//     });
+//     console.log(editingBlogId)
 
+//     const responseText = await res.text();
+//     let data;
+    
+//     try {
+//       data = JSON.parse(responseText);
+//     } catch {
+//       throw new Error(`Server returned: ${responseText.substring(0, 100)}...`);
+//     }
+
+//     if (!res.ok) throw new Error(data.message || `Update failed with status ${res.status}`);
+
+//     // Refresh data
+//     const refreshRes = await fetch(`${API_BASE_URL}api/blog/myBlogs`, {
+//       headers: { Authorization: `Bearer ${token}` }
+//     });
+//     const refreshedData = await refreshRes.json();
+    
+//     setBlogs(refreshedData.blogs);
+//     setIsEditMode(false);
+//     setEditingBlogId(null);
+//     setActiveTab('myBlogs');
+    
+//   } catch (err) {
+//     console.error("Update error:", err);
+//     setError(err.message.includes("Unexpected token") 
+//       ? "Server error - please try again" 
+//       : err.message);
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
+const handleUpdateBlog = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError(null);
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    setError("No token found");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('title', blogData.title);
+    formData.append('topic', blogData.topic);
+    formData.append('category', blogData.category);
+    formData.append('description', blogData.description);
+    formData.append('content', blogData.content);
+
+    // Debug FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    if (blogData.pic) {
+      if (blogData.pic.size > 5 * 1024 * 1024) {
+        throw new Error("Image must be smaller than 5MB");
+      }
+      if (!blogData.pic.type.startsWith("image/")) {
+        throw new Error("Only image files are allowed");
+      }
+      formData.append('pic', blogData.pic);
+      console.log('Image appended to FormData');
+    }
+
+    if (blogData.existingPic) {
+      formData.append('existingPic', blogData.existingPic);
+    }
+
+    if (blogData.hashtag?.length) {
+      formData.append('hashtag', JSON.stringify(blogData.hashtag));
+    }
+
+    const res = await fetch(`${API_BASE_URL}api/blog/update/${editingBlogId}`, {
+      method: "PUT",
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        // Don't set Content-Type - let browser set it with boundary
+      },
+      body: formData,
+    });
+
+    
+
+    console.log('Response status:', res.status);
+
+    const responseText = await res.text();
+    let data;
+    console.log('Full response:', responseText); // Add this line
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      throw new Error(`Server returned: ${responseText.substring(0, 100)}...`);
+    }
+
+    if (!res.ok) throw new Error(data.message || `Update failed with status ${res.status}`);
+
+    // Refresh data
+    const refreshRes = await fetch(`${API_BASE_URL}api/blog/myBlogs`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const refreshedData = await refreshRes.json();
+    
+    setBlogs(refreshedData.blogs);
+    setIsEditMode(false);
+    setEditingBlogId(null);
+    setActiveTab('myBlogs');
+    
+  } catch (err) {
+    console.error("Update error:", err);
+    setError(err.message.includes("Unexpected token") 
+      ? "Server error - please try again" 
+      : err.message);
+  } finally {
+    setIsLoading(false);
+  }
+}
   const handleDeleteBlog = async (blogId) => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
@@ -317,12 +501,12 @@ const Dashboard = () => {
               <div className="blog-grid">
                 {blogs.map((blog) => (
                   <div key={blog._id} className="blog-card">
-                   
+
                     {blog.pic && (
-                      <img 
-                        src={`${API_BASE_URL}${blog.pic}`} 
-                        alt={blog.title} 
-                        className="blog-cover" 
+                      <img
+                        src={`${API_BASE_URL}${blog.pic}`}
+                        alt={blog.title}
+                        className="blog-cover"
                       />
                     )}
                     <div className="blog-card-content">
@@ -330,6 +514,7 @@ const Dashboard = () => {
                       <p className="blog-topic">{blog.topic}</p>
                       <p className="blog-category">{blog.category}</p>
                       <p className="blog-description">{blog.description}</p>
+                      <p className="blog-description">{blog.content}</p>
                       <p className="blog-date">
                         {new Date(blog.publishDate).toLocaleDateString()}
                       </p>
@@ -374,35 +559,35 @@ const Dashboard = () => {
             <form onSubmit={handleCreateBlog} className="blog-form">
               <div className="form-group">
                 <label htmlFor="title">Title*</label>
-                <input 
-                  type="text" 
-                  id="title" 
-                  name="title" 
-                  value={blogData.title} 
-                  onChange={onInputChange} 
-                  required 
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={blogData.title}
+                  onChange={onInputChange}
+                  required
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="topic">Topic*</label>
-                <input 
-                  type="text" 
-                  id="topic" 
-                  name="topic" 
-                  value={blogData.topic} 
-                  onChange={onInputChange} 
-                  required 
+                <input
+                  type="text"
+                  id="topic"
+                  name="topic"
+                  value={blogData.topic}
+                  onChange={onInputChange}
+                  required
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="category">Category*</label>
-                <select 
-                  id="category" 
-                  name="category" 
-                  value={blogData.category} 
-                  onChange={onInputChange} 
+                <select
+                  id="category"
+                  name="category"
+                  value={blogData.category}
+                  onChange={onInputChange}
                   required
                 >
                   <option value="">Select a category</option>
@@ -417,25 +602,25 @@ const Dashboard = () => {
 
               <div className="form-group">
                 <label htmlFor="description">Description*</label>
-                <textarea 
-                  id="description" 
-                  name="description" 
-                  value={blogData.description} 
-                  onChange={onInputChange} 
-                  required 
-                  rows="3" 
+                <textarea
+                  id="description"
+                  name="description"
+                  value={blogData.description}
+                  onChange={onInputChange}
+                  required
+                  rows="3"
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="content">Content*</label>
-                <textarea 
-                  id="content" 
-                  name="content" 
-                  value={blogData.content} 
-                  onChange={onInputChange} 
-                  required 
-                  rows="10" 
+                <textarea
+                  id="content"
+                  name="content"
+                  value={blogData.content}
+                  onChange={onInputChange}
+                  required
+                  rows="10"
                 />
               </div>
 
@@ -463,9 +648,9 @@ const Dashboard = () => {
               </div>
 
               <div className="form-actions">
-                <button 
-                  type="submit" 
-                  className="submit-button" 
+                <button
+                  type="submit"
+                  className="submit-button"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Creating...' : 'Create Blog'}
